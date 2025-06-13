@@ -15,7 +15,7 @@ void queue_destroy(struct request_queue_t *queue) {
     pthread_cond_destroy(&queue->not_full);
 
     struct request_t *current = queue->head;
-    while (current != queue->tail) {
+    while (current != NULL) {
         struct request_t *next = current->next;
         free(current);
         current = next;
@@ -28,26 +28,29 @@ struct request_t* queue_dequeue(struct request_queue_t *queue) {
 
     // Wait until the queue is not empty
     while (queue->size == 0) {
-        pthread_cond_wait(&queue->not_empty, &queue->mutex); // wait for a request to be available
+        pthread_cond_wait(&queue->not_empty, &queue->mutex);
     }
 
     // Get request
     struct request_t* request = queue->head;
-    // check if queue is empty before going to next
+
+    // Update queue pointers
     if (queue->size == 1) {
         queue->head = NULL;
         queue->tail = NULL;
     } else {
-        queue->head = request->next; // Move head to the next request
-        //check if was full, send signal if so
-        if (queue->size == queue->capacity) {
-            pthread_cond_signal(&queue->not_full); // signal that the queue is not full
-        }
+        queue->head = request->next;
     }
-    queue->size--;
-    pthread_mutex_unlock(&queue->mutex);
 
-    return request; // Return the dequeued request
+    queue->size--;
+
+    // Signal if queue was full before dequeuing
+    if (queue->size == queue->capacity - 1) {
+        pthread_cond_signal(&queue->not_full);
+    }
+
+    pthread_mutex_unlock(&queue->mutex);
+    return request;
 }
 
 int queue_enqueue(struct request_queue_t *queue, int connfd, struct timeval arrival) {
@@ -55,22 +58,32 @@ int queue_enqueue(struct request_queue_t *queue, int connfd, struct timeval arri
 
     // Wait until the queue is not full
     while (queue->size == queue->capacity) {
-        pthread_cond_wait(&queue->not_full, &queue->mutex); // wait for space to be available
+        pthread_cond_wait(&queue->not_full, &queue->mutex);
     }
 
-    struct request_t current_request = {connfd, arrival, NULL};
+    // Allocate and initialize new request
     struct request_t *new_request = malloc(sizeof(struct request_t));
-    new_request = &current_request; // Copy the current request into the new request
-    if(queue->size == 0) {
-        queue -> head = new_request;
-        queue -> tail = new_request; // If queue was empty, set both head and tail to the new request
-        pthread_cond_signal(&queue->not_empty); // signal that the queue is not empty
+    if (!new_request) {
+        pthread_mutex_unlock(&queue->mutex);
+        return -1; // Memory allocation failed
     }
-    else {
-        queue->tail->next = new_request; // Link the new request to the end of the queue
-        queue->tail = new_request; // Update the tail to the new request
+
+    // Copy data to new request
+    new_request->connfd = connfd;
+    new_request->arrival = arrival;
+    new_request->next = NULL;
+
+    // Add to queue
+    if (queue->size == 0) {
+        queue->head = new_request;
+        queue->tail = new_request;
+        pthread_cond_signal(&queue->not_empty);
+    } else {
+        queue->tail->next = new_request;
+        queue->tail = new_request;
     }
-    queue->size++; // Increment the size of the queue
+
+    queue->size++;
     pthread_mutex_unlock(&queue->mutex);
     return 0;
 }
