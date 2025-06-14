@@ -77,8 +77,7 @@ int main(int argc, char *argv[])
     getargs(&port, argc, argv);
     
     // Make request queue
-    struct request_queue_t queue_init = {NULL, NULL, 0, SIZE_MAX}; // Initialize the queue
-    struct request_queue_t *queue = & queue_init; // Pointer to the queue
+    struct request_queue_t* queue = create_queue(QUEUE_SIZE);
     
     // make worker thread argument and threads
     pthread_t *threads = malloc(POOL_SIZE * sizeof(pthread_t));
