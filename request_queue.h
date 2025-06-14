@@ -29,4 +29,6 @@ int queue_enqueue(struct request_queue_t *queue, int connfd, struct timeval arri
 
 struct request_t* queue_dequeue(struct request_queue_t *queue);
 
+struct request_queue_t* create_queue(int capacity);
+
 #endif //OS_HW3_REQUEST_QUEUE_H
