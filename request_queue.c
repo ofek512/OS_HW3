@@ -7,6 +7,23 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
+struct request_queue_t* create_queue(int capacity) {
+    struct request_queue_t* queue = malloc(sizeof(struct request_queue_t));
+    if (!queue) return NULL;
+    
+    queue->head = NULL;
+    queue->tail = NULL;
+    queue->size = 0;
+    queue->capacity = capacity;
+    
+    pthread_mutex_init(&queue->mutex, NULL);
+    pthread_cond_init(&queue->not_empty, NULL);
+    pthread_cond_init(&queue->not_full, NULL);
+    
+    return queue;
+}
+
 void queue_destroy(struct request_queue_t *queue) {
     if (!queue) return;
 
