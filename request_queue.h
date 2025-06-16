@@ -27,7 +27,7 @@ void queue_destroy(struct request_queue_t *queue);
 
 int queue_enqueue(struct request_queue_t *queue, int connfd, struct timeval arrival);
 
-struct request_t* queue_dequeue(struct request_queue_t *queue);
+struct request_t* queue_dequeue(struct request_queue_t *queue); // TODO: change the return value
 
 struct request_queue_t* create_queue(int capacity);
 

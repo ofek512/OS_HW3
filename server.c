@@ -31,12 +31,12 @@ void getargs(int *port, int argc, char *argv[])
 #define POOL_SIZE 4
 #define QUEUE_SIZE 10
 
+
 // Thread worker unit
 typedef struct {
-    //int id;
     threads_stats stats;
-    struct request_queue *queue; // create the request queue
-    //server_log log;
+    struct request_queue_t *queue; // create the request queue
+    server_log log;
 
 } worker_unit;
 
@@ -49,17 +49,18 @@ void *worker_thread(void *arg)
 
     while(1) {
         // Get a request from the queue
-        struct request_t request = queue_dequeue(queue);
+        struct request_t* request = queue_dequeue(queue);
 
         struct timeval dispatch;
         gettimeofday(&dispatch, NULL);
 
         // Process the request
 
-        requestHandle(request.connfd, request.arrival, dispatch, t_stats, log);
+        requestHandle(request->connfd, request->arrival, dispatch, t_stats, warg->log);
 
         // Close connection
-        Close(request.connfd);
+        Close(request->connfd);
+        free(request);
 
     }
     return NULL;
@@ -68,12 +69,11 @@ void *worker_thread(void *arg)
 int main(int argc, char *argv[])
 {
     // Create the global server log
-    server_log log = create_log();
 
     int listenfd, connfd, port, clientlen;
     struct sockaddr_in clientaddr;
     struct timeval arrival;
-
+    server_log log = create_log();
     getargs(&port, argc, argv);
     
     // Make request queue
@@ -95,6 +95,7 @@ int main(int argc, char *argv[])
         thread_args[i].stats->post_req = 0;    // POST request count
         thread_args[i].stats->total_req = 0;   // Total request count
         thread_args[i].queue = queue;          // Request queue
+        thread_args[i].log = log;              // Server log
 
         if(pthread_create(&threads[i], NULL, worker_thread, &thread_args[i]) != 0) {
             perror("Failed to create thread");
