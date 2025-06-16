@@ -2,6 +2,8 @@
 #include "request.h"
 #include "log.h"
 #include "request_queue.h" // to add later
+#include <stdio.h>
+#include <stdlib.h>
 
 //
 // server.c: A very, very simple web server
@@ -44,6 +46,7 @@ void *worker_thread(void *arg)
 {
     worker_unit *warg = (worker_unit*)arg;
     threads_stats t_stats = warg->stats;
+    printf("worker number : %d", t_stats->id);
     struct request_queue_t *queue = warg->queue;
     //server_log log = warg->log;
 
@@ -55,7 +58,6 @@ void *worker_thread(void *arg)
         gettimeofday(&dispatch, NULL);
 
         // Process the request
-
         requestHandle(request->connfd, request->arrival, dispatch, t_stats, warg->log);
 
         // Close connection
@@ -74,8 +76,12 @@ int main(int argc, char *argv[])
     struct sockaddr_in clientaddr;
     struct timeval arrival;
     server_log log = create_log();
+    if (!log) {
+        perror("failed to init log");
+        exit(1);
+    }
     getargs(&port, argc, argv);
-    
+
     // Make request queue
     struct request_queue_t* queue = create_queue(QUEUE_SIZE);
     

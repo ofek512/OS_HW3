@@ -1,5 +1,6 @@
-#ifndef SERVER_LOG_H
-#define SERVER_LOG_H
+#ifndef server_log_H
+#define server_log_H
+#include "segel.h"
 
 // TODO:
 // Implement a thread-safe server log system.
@@ -10,7 +11,9 @@
 // - Use appropriate synchronization primitives (e.g., pthread mutexes and condition variables).
 // - The log should allow appending entries and returning the full log content.
 
-typedef struct Server_Log* server_log;
+typedef struct Log_entry* log_entry;
+
+typedef struct Server_log* server_log;
 
 // Creates a new server log instance
 server_log create_log();
@@ -25,4 +28,9 @@ int get_log(server_log log, char** dst);
 // Appends a new entry to the log
 void add_to_log(server_log log, const char* data, int data_len);
 
-#endif // SERVER_LOG_H
+void reader_lock(server_log log);
+void reader_unlock(server_log log);
+void writer_lock(server_log log);
+void writer_unlock(server_log log);
+
+#endif // server_log_H

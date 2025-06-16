@@ -187,6 +187,12 @@ void requestServePost(int fd,  struct timeval arrival, struct timeval dispatch, 
     free(body);
 }
 
+void record_log_stat(threads_stats t_stats, struct timeval arrival, struct timeval dispatch, server_log log) {
+    char* buf = (char*)malloc(600);
+    append_stats(buf, t_stats, arrival, dispatch);
+    add_to_log(log, buf, 600);
+}
+
 // handle a request
 void requestHandle(int fd, struct timeval arrival, struct timeval dispatch, threads_stats t_stats, server_log log)
 {
@@ -237,6 +243,10 @@ void requestHandle(int fd, struct timeval arrival, struct timeval dispatch, thre
 
     } else if (!strcasecmp(method, "POST")) {
         requestServePost(fd, arrival, dispatch, t_stats, log);
+        t_stats->post_req++;
+        t_stats->total_req++;
+        record_log_stat(t_stats, arrival, dispatch, log);
+
 
     } else {
         requestError(fd, method, "501", "Not Implemented",
@@ -244,4 +254,5 @@ void requestHandle(int fd, struct timeval arrival, struct timeval dispatch, thre
                      arrival, dispatch, t_stats);
         return;
     }
+
 }

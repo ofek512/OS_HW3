@@ -4,7 +4,7 @@
 
 #ifndef OS_HW3_REQUEST_QUEUE_H
 #define OS_HW3_REQUEST_QUEUE_H
-
+#include "segel.h"
 
 typedef struct request_t {
     int connfd;
