@@ -42,13 +42,22 @@ typedef struct {
 
 } worker_unit;
 
+struct timeval calculate_interval(struct timeval start, struct timeval end) {
+    struct timeval temp = end;
+    temp.tv_sec -= start.tv_sec;
+    temp.tv_usec -= start.tv_usec;
+    if (temp.tv_usec < 0) {
+        temp.tv_sec -= 1;
+        temp.tv_usec += 1000000;
+    }
+    return temp;
+}
+
 void *worker_thread(void *arg)
 {
     worker_unit *warg = (worker_unit*)arg;
     threads_stats t_stats = warg->stats;
-    printf("worker number : %d", t_stats->id);
     struct request_queue_t *queue = warg->queue;
-    //server_log log = warg->log;
 
     while(1) {
         // Get a request from the queue
@@ -56,6 +65,7 @@ void *worker_thread(void *arg)
 
         struct timeval dispatch;
         gettimeofday(&dispatch, NULL);
+        dispatch = calculate_interval(request->arrival, dispatch);
 
         // Process the request
         requestHandle(request->connfd, request->arrival, dispatch, t_stats, warg->log);
@@ -95,7 +105,7 @@ int main(int argc, char *argv[])
         thread_args[i].stats = malloc(sizeof(struct Threads_stats));
 
         // set up thread arguments
-        thread_args[i].stats->id = i;          // Thread ID
+        thread_args[i].stats->id = i + 1;          // Thread ID
         thread_args[i].stats->stat_req = 0;    // Static request count
         thread_args[i].stats->dynm_req = 0;    // Dynamic request count
         thread_args[i].stats->post_req = 0;    // POST request count

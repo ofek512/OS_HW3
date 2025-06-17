@@ -136,7 +136,6 @@ void add_to_log(server_log log, const char* data, int data_len) {
         perror("invalid arguments");
         return;
     }
-
     struct Log_entry* to_append = (struct Log_entry*)malloc(sizeof(struct Log_entry));
     // Check malloc
     if (!to_append) {
