@@ -2,7 +2,7 @@
 #include <string.h>
 #include "log.h"
 
-// Opaque struct definition
+// log_entry struct definition
 struct Log_entry {
     char* data;
     int data_len;
@@ -17,8 +17,6 @@ struct Server_log {
     pthread_cond_t read_allowed;
     pthread_cond_t write_allowed;
     int readers, writers, waiting_writers;
-
-    // TODO: Implement internal log storage (e.g., dynamic buffer, linked list, etc.)
 };
 
 // Creates a new server log instance (stub)
@@ -38,7 +36,6 @@ server_log create_log() {
 
 // Destroys and frees the log (stub)
 void destroy_log(server_log log) {
-//    pthread_mutex_lock(&(log->mutex)); // Check this
     if (!log) return;
     struct Log_entry* current = log->head;
     while(current) {
@@ -47,7 +44,6 @@ void destroy_log(server_log log) {
         free(current); // Free the log entry
         current = next;
     }
-//    pthread_mutex_unlock(&(log->mutex));
     pthread_mutex_destroy(&(log->mutex));
     pthread_cond_destroy(&log->read_allowed);
     pthread_cond_destroy(&log->write_allowed);
@@ -95,12 +91,12 @@ void writer_unlock(server_log log) {
 
 // Returns dummy log content as string (stub)
 int get_log(server_log log, char** dst) {
-    if (!log) return 0;
-    int len = 1;
+    if (!log || log->size == 0) return 0;
+    int len = 0;
     reader_lock(log);
     struct Log_entry* current = log->head;
     for(int i = 0; i < log->size; i++) {
-        len += current->data_len; // Maybe need to check '\n'
+        len += current->data_len;
         current = current->next;
     }
     char* buf = (char*)malloc(len);
@@ -113,21 +109,11 @@ int get_log(server_log log, char** dst) {
     current = log->head;
     for (int i = 0; i < log->size; i++) {
         strcat(buf, current->data);
-        current = current->next; // Maybe '\n'
+        current = current->next;
     }
     reader_unlock(log);
-    if(*dst) {
-        strcpy(*dst, buf);
-    }
-    free(buf);
+    *dst = buf;
     return len;
-//    const char* dummy = "Log is not implemented.\n";
-//    int len = strlen(dummy);
-//    *dst = (char*)malloc(len + 1); // Allocate for caller
-//    if (*dst != NULL) {
-//        strcpy(*dst, dummy);
-//    }
-//    return len;
 }
 
 // Appends a new entry to the log (no-op stub)

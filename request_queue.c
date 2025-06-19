@@ -1,7 +1,3 @@
-//
-// Created by ofek5 on 2025-06-13.
-//
-
 #include "request_queue.h"
 #include <pthread.h>
 #include <stdlib.h>

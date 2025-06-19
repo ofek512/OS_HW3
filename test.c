@@ -505,11 +505,11 @@ static void run_tests_for_config(int num_threads, int queue_size) {
     test_no_spinlock();
     test_404_not_found();
     test_403_forbidden_static();
-//    test_403_forbidden_dynamic();
+    test_403_forbidden_dynamic();
     test_501_not_implemented();
     test_static_get();
     test_dynamic_get();
-//    test_post_log();
+    test_post_log();
     test_concurrent_get();
 
     /* Kill server */

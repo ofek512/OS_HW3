@@ -24,7 +24,6 @@ void getargs(int *port, int argc, char *argv[])
     }
     *port = atoi(argv[1]);
 }
-// TODO: HW3 — Initialize thread pool and request queue
 // This server currently handles all requests in the main thread.
 // You must implement a thread pool (fixed number of worker threads)
 // that process requests from a synchronized queue.
@@ -98,8 +97,6 @@ int main(int argc, char *argv[])
     // make worker thread argument and threads
     pthread_t *threads = malloc(POOL_SIZE * sizeof(pthread_t));
     worker_unit *thread_args = malloc(POOL_SIZE * sizeof(worker_unit));
-    
-    // imaginary malloc fail check
 
     for (int i = 0; i < POOL_SIZE; ++i) {
         thread_args[i].stats = malloc(sizeof(struct Threads_stats));
@@ -127,33 +124,9 @@ int main(int argc, char *argv[])
         clientlen = sizeof(clientaddr);
         connfd = Accept(listenfd, (SA *)&clientaddr, (socklen_t *) &clientlen);
 
-        // TODO: HW3 — Record the request arrival time here
         gettimeofday(&arrival, NULL);
 
         queue_enqueue(queue, connfd, arrival); // make sure the queue is not full
-
-//        // DEMO PURPOSE ONLY:
-//        // This is a dummy request handler that immediately processes
-//        // the request in the main thread without concurrency.
-//        // Replace this with logic to enqueue the connection and let
-//        // a worker thread process it from the queue.
-//
-//        threads_stats t = malloc(sizeof(struct Threads_stats));
-//        t->id = 0;             // Thread ID (placeholder)
-//        t->stat_req = 0;       // Static request count
-//        t->dynm_req = 0;       // Dynamic request count
-//        t->total_req = 0;      // Total request count
-//
-//        struct timeval arrival, dispatch;
-//        arrival.tv_sec = 0; arrival.tv_usec = 0;   // DEMO: dummy timestamps
-//        dispatch.tv_sec = 0; dispatch.tv_usec = 0; // DEMO: dummy timestamps
-//        // gettimeofday(&arrival, NULL);
-//
-//        // Call the request handler (immediate in main thread — DEMO ONLY)
-//        requestHandle(connfd, arrival, dispatch, t, log);
-//
-//        free(t); // Cleanup
-//        Close(connfd); // Close the connection
     }
     // Clean up the server log before exiting
     for (int i = 0; i < POOL_SIZE; ++i) {
@@ -166,5 +139,4 @@ int main(int argc, char *argv[])
     queue_destroy(queue); // Clean up the request queue TODO
     destroy_log(log);
 
-    // TODO: HW3 — Add cleanup code for thread pool and queue
 }

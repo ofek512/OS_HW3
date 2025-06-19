@@ -192,13 +192,12 @@ void record_log_stat(threads_stats t_stats, struct timeval arrival, struct timev
     append_stats(buf, t_stats, arrival, dispatch);
     int real_size = 0;
     while (buf[real_size++] != '\0') {}
-    add_to_log(log, buf, real_size-1);
+    add_to_log(log, buf, real_size);
 }
 
 // handle a request
 void requestHandle(int fd, struct timeval arrival, struct timeval dispatch, threads_stats t_stats, server_log log)
 {
-    // TODO:  should update static request stats
     int is_static;
     struct stat sbuf;
     char buf[MAXLINE], method[MAXLINE], uri[MAXLINE], version[MAXLINE];
@@ -219,7 +218,7 @@ void requestHandle(int fd, struct timeval arrival, struct timeval dispatch, thre
                          "OS-HW3 Server could not find this file",
                          arrival, dispatch, t_stats);
             t_stats->total_req++;
-            record_log_stat(t_stats, arrival, dispatch, log);
+//            record_log_stat(t_stats, arrival, dispatch, log);
             return;
         }
 
@@ -229,7 +228,7 @@ void requestHandle(int fd, struct timeval arrival, struct timeval dispatch, thre
                              "OS-HW3 Server could not read this file",
                              arrival, dispatch, t_stats);
                 t_stats->total_req++;
-                record_log_stat(t_stats, arrival, dispatch, log);
+//                record_log_stat(t_stats, arrival, dispatch, log);
                 return;
             }
 
@@ -244,7 +243,7 @@ void requestHandle(int fd, struct timeval arrival, struct timeval dispatch, thre
                              "OS-HW3 Server could not run this CGI program",
                              arrival, dispatch, t_stats);
                 t_stats->total_req++;
-                record_log_stat(t_stats, arrival, dispatch, log);
+//                record_log_stat(t_stats, arrival, dispatch, log);
                 return;
             }
             t_stats->total_req++;
@@ -253,21 +252,16 @@ void requestHandle(int fd, struct timeval arrival, struct timeval dispatch, thre
             requestServeDynamic(fd, filename, cgiargs, arrival, dispatch, t_stats);
         }
 
-        // TODO: add log entry using add_to_log(server_log log, const char* data, int data_len);
-
     } else if (!strcasecmp(method, "POST")) {
         requestServePost(fd, arrival, dispatch, t_stats, log);
         t_stats->post_req++;
         t_stats->total_req++;
-        record_log_stat(t_stats, arrival, dispatch, log);
-
-
     } else {
         requestError(fd, method, "501", "Not Implemented",
                      "OS-HW3 Server does not implement this method",
                      arrival, dispatch, t_stats);
         t_stats->total_req++;
-        record_log_stat(t_stats, arrival, dispatch, log);
+//        record_log_stat(t_stats, arrival, dispatch, log);
         return;
     }
 
