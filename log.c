@@ -4,7 +4,7 @@
 
 // Opaque struct definition
 struct Log_entry {
-    const char* data;
+    char* data;
     int data_len;
     struct Log_entry* next;
 };
