@@ -38,7 +38,7 @@ server_log create_log() {
 
 // Destroys and frees the log (stub)
 void destroy_log(server_log log) {
-    pthread_mutex_lock(&(log->mutex)); // Check this
+//    pthread_mutex_lock(&(log->mutex)); // Check this
     if (!log) return;
     struct Log_entry* current = log->head;
     while(current) {
@@ -47,7 +47,7 @@ void destroy_log(server_log log) {
         free(current); // Free the log entry
         current = next;
     }
-    pthread_mutex_unlock(&(log->mutex));
+//    pthread_mutex_unlock(&(log->mutex));
     pthread_mutex_destroy(&(log->mutex));
     pthread_cond_destroy(&log->read_allowed);
     pthread_cond_destroy(&log->write_allowed);
@@ -143,7 +143,7 @@ void add_to_log(server_log log, const char* data, int data_len) {
         return;
     }
     to_append->data = (char*)malloc(data_len);
-    strcpy(data, to_append->data);
+    memcpy(to_append->data, data, data_len);
     to_append->data_len = data_len;
     to_append->next = NULL;
 
