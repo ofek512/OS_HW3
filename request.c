@@ -183,6 +183,7 @@ void requestServePost(int fd,  struct timeval arrival, struct timeval dispatch, 
     sprintf(header, "%sContent-Type: %s\r\n", header, "text/plain");
     int header_len = append_stats(header, t_stats, arrival, dispatch);
     Rio_writen(fd, header, header_len);
+    Rio_writen(fd, "\r\n", 2);
     Rio_writen(fd, body, body_len);
     free(body);
 }
