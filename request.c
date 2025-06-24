@@ -190,10 +190,8 @@ void requestServePost(int fd,  struct timeval arrival, struct timeval dispatch, 
 
 void record_log_stat(threads_stats t_stats, struct timeval arrival, struct timeval dispatch, server_log log) {
     char buf[1000];
-    append_stats(buf, t_stats, arrival, dispatch);
-    int real_size = 0;
-    while (buf[real_size++] != '\0') {}
-    add_to_log(log, buf, real_size);
+    int offset = append_stats(buf, t_stats, arrival, dispatch);
+    add_to_log(log, buf, offset+1);
 }
 
 // handle a request

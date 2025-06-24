@@ -85,7 +85,7 @@ int queue_enqueue(struct request_queue_t *queue, int connfd, struct timeval arri
     new_request->connfd = connfd;
     new_request->arrival = arrival;
     new_request->next = NULL;
-
+    gettimeofday(&arrival, NULL);
     // Add to queue
     if (queue->size == 0) {
         queue->head = new_request;
