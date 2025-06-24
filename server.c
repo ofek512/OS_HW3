@@ -116,15 +116,11 @@ int main(int argc, char *argv[])
         }
     }
 
-    // WE HAVE A THREAD POOL NOW!
-    
 
     listenfd = Open_listenfd(port);
     while (1) {
         clientlen = sizeof(clientaddr);
         connfd = Accept(listenfd, (SA *)&clientaddr, (socklen_t *) &clientlen);
-
-        gettimeofday(&arrival, NULL);
 
         queue_enqueue(queue, connfd, arrival); // make sure the queue is not full
     }
